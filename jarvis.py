@@ -11,18 +11,19 @@ import threading
 import edge_tts
 import asyncio
 from serpapi import GoogleSearch
-import openai
 from dotenv import load_dotenv
 import os
 
 load_dotenv()  # Load variables from .env
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+DEEPSEEK_API_URL = "http://openrouter.ai/deepseek/deepseek-chat-v3.1:free/api"
+DEEPSEEK_MODEL = "deepseek/deepseek-chat-v3.1:free"
+
 SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY")
 
 
 
-openai.api_key = OPENAI_API_KEY
 
 # At the top of your jarvis.py
 SERPAPI_KEY = SERPAPI_API_KEY
@@ -163,16 +164,25 @@ def search_google(query):
         return "Search failed due to an error."
 
 
-def get_chatgpt_response(prompt: str, query: str = None) -> str:
+def get_deepseek_response(prompt: str, query: str = None) -> str:
     try:
-        response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7
-        )
-        return response.choices[0].message.content.strip()
+        headers = {
+            "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": DEEPSEEK_MODEL,
+            "input": prompt
+        }
+        response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
+        response.raise_for_status()
+        data = response.json()
+        # Adjust depending on DeepSeek output format
+        return data.get("output", "").strip()
+    
     except Exception as e:
-        print("DEBUG [ChatGPT Error]:", e)
+        print("DEBUG [DeepSeek Error]:", e)
+
         # If GPT fails and this was for intent classification, return fallback intent
         if query:
             # keyword-based fallback
@@ -201,7 +211,7 @@ def get_chatgpt_response(prompt: str, query: str = None) -> str:
 def smart_reply(query):
     try:
         # Ask LLM if it's a search query or chat
-        intent = get_chatgpt_response(
+        intent = get_deepseek_response(
             f"Classify this request strictly as 'search' or 'chat': {query}",
             query=query
         )
@@ -209,7 +219,7 @@ def smart_reply(query):
         if "search" in intent.lower():
             return search_google(query)
         else:
-            return get_chatgpt_response(query, query=query)
+            return get_deepseek_response(query, query=query)
     except Exception as e:
         print("❌ Smart Reply Error:", e)
         return "I couldn't process that."
@@ -224,7 +234,7 @@ def classify_command(query):
     Input: "{query}"
     Answer with ONLY the label, nothing else.
     """
-    intent = get_chatgpt_response(instruction, query=query).strip().lower()
+    intent = get_deepseek_response(instruction, query=query).strip().lower()
 
     # ---------------- FALLBACK KEYWORD SCAN ----------------
     valid_labels = [

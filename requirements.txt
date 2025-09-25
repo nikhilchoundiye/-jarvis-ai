@@ -34,7 +34,6 @@ jiter==0.11.0
 lxml==6.0.1
 MouseInfo==0.1.3
 multidict==6.6.4
-openai==1.107.3
 primp==0.15.0
 propcache==0.3.2
 proto-plus==1.26.1
@@ -69,6 +68,7 @@ typing-inspection==0.4.1
 typing_extensions==4.15.0
 uritemplate==4.2.0
 urllib3==2.5.0
-webrtcvad-wheels @ file:///C:/Users/ADMIN/Downloads/jarvis-main/webrtcvad_wheels-2.0.14-cp312-cp312-win_amd64.whl#sha256=4010b95b31b9b360fd1bf47a8344b06b946ec866cf3d14fb39fc692307ddf312
+webrtcvad-wheels @ file://./wheels/webrtcvad_wheels-2.0.14-cp312-cp312-win_amd64.whl
+
 wikipedia==1.4.0
 yarl==1.20.1
