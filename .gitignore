@@ -1,7 +1,6 @@
 venv/
 __pycache__/
 *.pyc
-webrtcvad_wheels-2.0.14-cp312-cp312-win_amd64.whl
 .DS_Store
 Thumbs.db
 .env
